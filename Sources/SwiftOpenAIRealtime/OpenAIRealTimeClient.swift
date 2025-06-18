@@ -1,5 +1,6 @@
 import Foundation
 
+@available(macOS 12.0, *)  // Add this line
 public class OpenAIRealtimeClient: NSObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private let apiKey: String
@@ -12,7 +13,6 @@ public class OpenAIRealtimeClient: NSObject {
         super.init()
     }
 
-    // ADD THIS METHOD TO CHECK CONNECTION STATUS:
     public func checkConnectionStatus() {
         if let task = webSocketTask {
             print("📊 WebSocket State: \(task.state)")
@@ -22,19 +22,31 @@ public class OpenAIRealtimeClient: NSObject {
             print("📊 No WebSocket task exists")
         }
     }
-    
-    
+
+    // ADD THIS METHOD TO CHECK CONNECTION STATUS:
     public func connect() {
+        print("🔑 API Key: \(String(apiKey.prefix(10)))...")
+        print("🌐 URL: \(realtimeURL)")
+        
         var request = URLRequest(url: URL(string: realtimeURL)!)
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("realtime=v1", forHTTPHeaderField: "OpenAI-Beta")
         
+        // Add debug headers
+        print("📋 Headers:")
+        print("   Authorization: Bearer \(String(apiKey.prefix(20)))...")
+        print("   OpenAI-Beta: realtime=v1")
+        
         webSocketTask = URLSession.shared.webSocketTask(with: request)
+        webSocketTask?.delegate = self
         webSocketTask?.resume()
         
         print("🔌 Connecting to OpenAI Realtime API...")
+        startListening()
     }
-        // ADD THIS NEW METHOD:
+    
+
+
     private func startListening() {
         webSocketTask?.receive { [weak self] result in
             switch result {
@@ -65,7 +77,8 @@ public class OpenAIRealtimeClient: NSObject {
     }
 }
 
-// Rust Traits, but in swift
+
+@available(macOS 12.0, *)  // Add this line
 extension OpenAIRealtimeClient: URLSessionWebSocketDelegate {
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
         print("✅ Connected to OpenAI Realtime API!")
@@ -74,6 +87,18 @@ extension OpenAIRealtimeClient: URLSessionWebSocketDelegate {
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         print("❌ WebSocket closed: \(closeCode)")
-        idConnected = false
+        isConnected = false
     }
+
+    public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            print("💥 WebSocket connection error: \(error)")
+            print("💥 Error description: \(error.localizedDescription)")
+        }
+        isConnected = false
+    }
+        
+
+    
+
 }

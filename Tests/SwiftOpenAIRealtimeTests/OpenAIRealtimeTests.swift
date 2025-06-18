@@ -10,14 +10,25 @@ final class OpenAIRealtimeTests: XCTestCase {
         XCTAssertTrue(apiKey.hasPrefix("sk-"), "API key should start with 'sk-'")
         
         let client = OpenAIRealtimeClient(apiKey: apiKey)
-        
         let expectation = XCTestExpectation(description: "OpenAI connection test")
         
         // Test connection
         client.connect()
         
-        // Wait for connection and send a test message
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        // Check connection status at different intervals
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            print("🔍 After 2 seconds:")
+            client.checkConnectionStatus()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            print("🔍 After 5 seconds:")
+            client.checkConnectionStatus()
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+            print("🔍 After 8 seconds:")
+            client.checkConnectionStatus()
             print("Testing OpenAI Realtime API connection...")
             expectation.fulfill()
         }
