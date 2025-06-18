@@ -9,6 +9,7 @@ let package = Package(
     ],
     products: [
         .library(name: "SwiftOpenAIRealtime", targets: ["SwiftOpenAIRealtime"]),
+        .executable( name: "VoiceChat", targets: ["VoiceChat"])
     ],
     dependencies: [
         .package(url: "https://github.com/stasel/WebRTC.git", .upToNextMajor(from: "137.0.0"))
@@ -17,6 +18,10 @@ let package = Package(
         .target(
             name: "SwiftOpenAIRealtime",
             dependencies: ["WebRTC"]
+        ),
+        .executableTarget(
+            name: "VoiceChat",
+            dependencies: ["SwiftOpenAIRealtime"]
         ),
         .testTarget(
             name: "SwiftOpenAIRealtimeTests",
